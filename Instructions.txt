@@ -1,0 +1,49 @@
+Get Pi Running Kiosk and Fullscreen Web Browsing.
+
+Install Noobs and Rasperian
+Config Wifi
+
+Install Matchbox
+sudo apt-get install matchbox
+
+Install Midori
+
+install unclutter
+sudo apt-get install unclutter
+
+make sure x11-xserver-utils is installed
+sudo apt-get install x11-xserver-utils
+
+
+
+make .sh script
+------------------------
+#!/bin/sh
+
+#no screensaver
+xset -dpms
+xset s off
+
+#unclutter
+unclutter &
+
+#start matchbox and midori with crash loop
+#while true; do
+matchbox-window-manager &
+sleep 5s && midori  --inactivity-reset=120 -e Fullscreen --app=/PATH/TO/HOMEPAGE/FILE.html
+#done
+#uncomment to activate
+--------------------------
+
+add hdmi screen stuff to config.txt
+
+max_usb_current=1
+hdmi_group=2
+hemi_mode=87
+hdmi_cvt 1024 600 60 6 0 0 0
+
+everything should work then.
+
+
+
+

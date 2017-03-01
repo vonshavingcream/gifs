@@ -6,9 +6,12 @@
 <script>
 function gif()
 {
-	var ran=Math.floor(Math.random()*41)
+	var ran=Math.floor(Math.random()*46)
 	document.body.style.background ='url("gifs/'+ran+'.gif")';
 	document.body.style.backgroundSize ='cover';
+	document.body.style.backgroundColor="#000000";
+console.log("number is: "+ran);
+	
 	setTimeout(function() { window.location=window.location;},5000);
 	
 }
@@ -22,7 +25,7 @@ function gif()
 
 
     </head>
-    <body onload="gif()"; style="background-repeat:repeat-y; background-size:cover;">
+    <body onload="gif()"; style="background-repeat:repeat-y; background-size:cover; background-color:black;">
 	
 	
 	

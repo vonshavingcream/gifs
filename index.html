@@ -1,42 +1,91 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>Knichael Might</title>
-       
+<head>
+  <title>Knichael Might</title>
+  <script>
+  var Gif = (function () {
+    var timer; // Holds the ID of the interval timer
+    var intervalDefault = 5000; // Default time for interval between switching gifs
 
-<script>
-function gif()
-{
+    // Set the first random image and start the timer.
+    // If you want to change the timing to one second you would call Gif.init(1000)
+    // from a console in your browser's developer tools.
+    function init (intervalArg) {
+      if (isNaN(intervalArg)) {
+        intervalArg = intervalDefault;
+      }
+      setRandomImg();
+      startTimer(intervalArg);
+    }
 
-	setInterval(function(){
-	var ran=Math.floor(Math.random()*50)
-	document.body.style.background ='url("gifs/'+ran+'.gif")';
-	document.body.style.backgroundSize ='cover';
-	document.body.style.backgroundColor="#000000";
-console.log("number is: "+ran);
-},5000);
-	
-	
-	
-}
+    // This method builds the path to a gif either by passing the name of the
+    // file or randomly.
+    function getGifPath (imgName) {
+      // Use imgName if it was passed in, if not generate a random number to use
+      var ran = (imgName || Math.floor(Math.random() * 50));
+      var path = 'url("gifs/' + ran + '.gif")';
+      // If a file name has not been passed in through imgName and the randomly
+      // generated file name matches the one already being used call this
+      // function recursively until it gives a new one.
+      if (!imgName && document.body.style.background == path) {
+        return getGifPath();
+      } else {
+        return path;
+      }
+    }
 
+    function setRandomImg () {
+      document.body.style.background = getGifPath();
+    }
 
- 
+    // Use this to explicitly set an image. Probably only useful for testing.
+    function setImg (imgName) {
+      document.body.style.background = getGifPath(imgName);
+    }
 
+    function startTimer (intervalArg) {
+      // If no interval value is passed in (or is not a number) use the default
+      // interval time.
+      if (isNaN(intervalArg)) {
+        intervalArg = intervalDefault;
+      }
+      // If an interval is already running make it stop before starting a new one
+      if (Gif.timer) {
+        stopTimer();
+      }
+    	Gif.timer = setInterval(setRandomImg, intervalArg);
+      console.log("timer started: " + intervalArg)
+    }
+    function stopTimer () {
+      clearInterval(Gif.timer);
+      Gif.timer = undefined;
+    }
 
-</script>
+    // The elements returned in this structure are accessible to outside JS code
+    // If it is not exposed in this structure it is not accessible outside of
+    // this closure.
+    // They can be accessed by using Gif.init() or Gif.stopTimer() for example.
+    return {
+      init : init,
+      timer : timer,
+      startTimer : startTimer,
+      stopTimer : stopTimer,
+      setImg : setImg,
+      setRandomImg : setRandomImg
+    }
+  }());
 
+  // As soon as the page loads fire the Gif.init() method.
+  document.addEventListener("DOMContentLoaded", function () {Gif.init();});
 
-
-
-    </head>
-    <body onload='gif();'; style="background-repeat:repeat-y; background-size:cover; background-color:black;">
-	
-	
-	
-
-
-<script>
-
-</script>
-	</body>
+  </script>
+  <style>
+  body {
+    background-repeat: repeat-y;
+    background-size: cover !important;
+    background-color: #000;
+  }
+  </style>
+</head>
+<body></body>
 </html>

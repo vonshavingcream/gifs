@@ -3,134 +3,138 @@
 <head>
   <title>Knichael Might</title>
   <script>
-   var Page = (function(){
-     var elem;
-     function init (elemId, timerInterval) {
-       elem = document.getElementById(elemId);
-       Gif.init(elem);
-       Gif.setRandomImg(); // Set the first gif
-       Timer.init(timerInterval, Page.iterate); // Start the timer and tell it the interval time and which function to execute
-     }
-     function iterate () {
-       Gif.setRandomImg();
-       Filter.applyRandomFilter(elem);
-     }
-     return {
-       init : init,
-       iterate : iterate
-     }
-   }());
-   var Gif = (function(){
-     var elem;
-     function init (elemArg) {
-       elem = elemArg;
-     }
-     // This method builds the path to a gif either by passing the name of the
-     // file or randomly.
-     function getGifPath (imgName) {
-       // Use imgName if it was passed in, if not generate a random number to use
-       var ran = (imgName || Math.floor(Math.random() * 50));
-       var path = 'url("gifs/' + ran + '.gif")';
-       // If a file name has not been passed in through imgName and the randomly
-       // generated file name matches the one already being used call this
-       // function recursively until it gives a new one.
-       if (!imgName && elem.style.background == path) {
-         return getGifPath();
-       } else {
-         return path;
-       }
-     }
-     function setRandomImg () {
-       setImg();
-     }
-     // Use this to explicitly set an image. Probably only useful for testing.
-     function setImg (imgName) {
-       elem.style.background = getGifPath(imgName);
-     }
-     return {
-       init : init,
-       setRandomImg : setRandomImg,
-       setImg : setImg
-     }
-   }());
-   var Timer = (function(){
-     var timer; // Holds the ID of the interval timer
-     var intervalDefault = 10000; // Default time for interval between switching gifs
-     var intervalTime = intervalDefault;
-     var intervalDefaultFunc = function () {return;};
-     var intervalFunc = intervalDefaultFunc;
-     // Set the first random image and start the timer.
-     // If you want to change the timing to one second you would call Gif.init(1000)
-     // from a console in your browser's developer tools.
-     function init (intervalArg, intervalMethod) {
-       if (!isNaN(intervalArg) && intervalArg > 0) {
-         intervalTime = intervalArg;
-       }
-       if (typeof intervalMethod == 'function') {
-         intervalFunc = intervalMethod;
-       } else {
-         intervalFunc = intervalDefaultFunc;
-       }
-       startTimer();
-     }
-     function startTimer () {
-       // If an interval is already running make it stop before starting a new one
-       if (timer) {
-         stopTimer();
-       }
-     	 timer = setInterval(intervalFunc, intervalTime);
-       console.log("timer started: " + intervalTime)
-     }
-     function stopTimer () {
-       clearInterval(timer);
-       timer = undefined;
-     }
-     return {
-       init : init,
-       timer : timer,
-       startTimer : startTimer,
-       stopTimer : stopTimer
-     }
-   }());
-   var Filter = (function(){
-     var currentFilter = "";
-     // This array should contain the CSS class names of all the filters you might want to apply
-     var filters = [
-       "hue","invert","saturate","sepia","grayscale","brightness","contrast"
-     ];
-     function shouldFilter () {
-       return (Math.floor(Math.random() * 4) % 3 == 0)
-     }
-     function pickRandomFilter () {
-       var filter = filters[Math.floor(Math.random() * filters.length)];
-       // If the random filter matches the currentFilter then try again
-       if (filter != currentFilter) {
-         return filter;
-       } else {
-         return pickRandomFilter();
-       }
-     }
-     function applyRandomFilter (elem) {
-       try {
-         elem.classList.remove(currentFilter);
-       } catch (e) {}
-       if (shouldFilter()) { // Check to see if a filter should be added
-         currentFilter = pickRandomFilter();
-         elem.classList.add(currentFilter); // If a filter should be added pick one at random
-       } else {
-         currentFilter = "";
-       }
-     }
-     return {
-       // This method is currently set to a 1 in 4 chance to return true.
-       // This method is used to determine whether a filter should applied.
-       shouldFilter: shouldFilter,
-       pickRandomFilter: pickRandomFilter,
-       applyRandomFilter: applyRandomFilter
-     }
-   }());
+    var rand = function (max) {
+      return Math.floor(Math.random() * max);
+    }
+    var log = function (message) {
+      console.log(message);
+    }
+
+    var Page = function (elemId) {
+      log(`Page initialized with: ${elemId}`);
+      this.elem = document.getElementById(elemId);
+      this.Gif = new Gif(this.elem);
+      this.Img = new Img(this.elem);
+      this.iterate(); // Set the first image
+      this.Timer = new Timer(10000, this.iterate, "Page Timer", this); // Start the timer and tell it the interval time and which function to execute
+      this.Timer.start();
+    }
+    // The method to execute every iteration of the timer
+    Page.prototype.iterate = function () {
+      var obj = this.Gif;
+      // 50/50 chance of picking an Img or Gif
+      if (rand(2)) {
+        obj = this.Img;
+      }
+      obj.set();
+      Filter.applyRandomFilter(this.elem);
+    }
+    // Default Img class
+    var Img = function (elem) {
+      this.elem = elem;
+      this.folder = "imgs";
+      this.filetype = "jpg";
+      this.max = 50; // Files are named with numbers this is the upper limit of the file names plus one
+    }
+    // If called without imgName argument it will set the image randomly
+    Img.prototype.set = function (imgName) {
+      this.elem.style.background = this.getFile(imgName);
+    };
+    // This method builds the path to an image either by passing the name of the
+    // file or randomly.
+    Img.prototype.getFile = function (imgName) {
+      // Use imgName if it was passed in, if not generate a random number to use
+      var img = (imgName || rand(this.max));
+      var path = `url("${this.folder}/${img}.${this.filetype}")`;
+      // If a file name has not been passed in through imgName and the randomly
+      // generated file name matches the one already being used call this
+      // function recursively until it gives a new one.
+      if (!imgName && this.elem.style.background == path) {
+        return this.set();
+      } else {
+        return path;
+      }
+    }
+    // Subclass of Img
+    var Gif = function (elem) {
+      Img.call(this, elem);
+      this.folder = "gifs";
+      this.filetype = "gif";
+      this.max = 50; // Files are named with numbers this is the upper limit of the file names plus one
+    }
+    // Inherit Img's methods
+    Gif.prototype = Object.create(Img.prototype);
+    Gif.prototype.constructor = Gif;
+
+    // These changes allow multiple Timers on the same page
+    var Timer = function (time, method, name, scope) {
+      this.id; // Holds the ID of the interval timer
+      this.time = time; // Interval in microseconds
+      this.name = name; // A name to show for logging
+      this.scope = (scope || this);
+      // setInterval executes methods in a different scope, when the method tries
+      // to access variables in "this" it fails. Binding the method to a specific
+      // scope fixes that.
+      this.method = method.bind(this.scope);
+    }
+    Timer.prototype.start = function() {
+      // If an interval is already running make it stop before starting a new one
+      if (this.id) {
+        this.stop();
+      }
+      this.id = setInterval(this.method, this.time);
+      log(`Timer: ${this.name}:${this.time} started`);
+    }
+    Timer.prototype.stop = function() {
+      clearInterval(this.id);
+      this.id = undefined;
+      log(`Timer: ${this.name}:${this.time} stopped`);
+    }
+
+    var Filter = (function(){
+      var currentFilter = "";
+      // This array should contain the CSS class names of all the filters you might want to apply
+      var filters = [
+        "hue","invert","saturate","sepia","grayscale","brightness","contrast"
+      ];
+      function shouldFilter () {
+        return (rand(4) % 3 == 0);
+      }
+      function pickRandomFilter () {
+        var filter = filters[rand(filters.length)];
+        // If the random filter matches the currentFilter then try again
+        if (filter != currentFilter) {
+          return filter;
+        } else {
+          return pickRandomFilter();
+        }
+      }
+      function applyRandomFilter (elem) {
+        try {
+          elem.classList.remove(currentFilter);
+          log(`Filter: ${currentFilter} removed`);
+        } catch (e) {}
+          if (shouldFilter()) { // Check to see if a filter should be added
+            currentFilter = pickRandomFilter();
+            elem.classList.add(currentFilter); // If a filter should be added pick one at random
+            log(`Filter: ${currentFilter} applied`);
+        } else {
+          currentFilter = "";
+        }
+      }
+      return {
+        // This method is currently set to a 1 in 4 chance to return true.
+        // This method is used to determine whether a filter should applied.
+        shouldFilter: shouldFilter,
+        pickRandomFilter: pickRandomFilter,
+        applyRandomFilter: applyRandomFilter
+      }
+    }());
+
    // As soon as the DOM loads fire the Page.init method
-   document.addEventListener("DOMContentLoaded", function () {Page.init('gifImg');});
+   document.addEventListener("DOMContentLoaded", function () {
+     window.app = new Page('gifImg');
+   });
   </script>
 
   <style>
@@ -139,7 +143,7 @@
     background-color: #000;
     overflow: hidden;
   }
-  body, #gifContainer, #gifImg {
+  body, #container, #gifImg {
     height: 100vh;
     width: 100vw;
     background-size: cover !important;
@@ -148,16 +152,16 @@
     background-position-y: 50% !important;
   }
   .trans-ease-in {
-    /* transition-timing-function: ease-in; */
+    transition-timing-function: ease-in;
   }
   .trans-ease-out {
-   /* transition-timing-function: ease-out; */
+    transition-timing-function: ease-out;
   }
   .trans-1s {
-   /* transition-duration: 1s; */
+    transition-duration: 1s;
   }
   .trans-06s {
-   /* transition-duration: 0.6s; */
+    transition-duration: 0.6s;
   }
   @-webkit-keyframes hue-rotate {
     0% {filter: hue-rotate(0);}
@@ -219,6 +223,6 @@
   </style>
 </head>
 <body>
-  <div id="gifContainer"><img id="gifImg" class="trans-ease-in trans-06s"/></div>
+  <div id="container"><img id="gifImg" class=""/></div>
 </body>
 </html>

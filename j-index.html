@@ -23,21 +23,18 @@
     Page.prototype.iterate = function () {
       var obj = this.Gif;
       // 50/50 chance of picking an Img or Gif
-	  var pick = rand(2);
-		console.log(pick);
-      if (pick === 1 ) {
+      if (rand(2)) {
         obj = this.Img;
-	  }
-		obj.set();
-		Filter.applyRandomFilter(this.elem,pick);
-		
+      }
+      obj.set();
+      Filter.applyRandomFilter(this.elem);
     }
     // Default Img class
     var Img = function (elem) {
       this.elem = elem;
       this.folder = "imgs";
       this.filetype = "jpg";
-      this.max = 11; // Files are named with numbers this is the upper limit of the file names plus one
+      this.max = 50; // Files are named with numbers this is the upper limit of the file names plus one
     }
     // If called without imgName argument it will set the image randomly
     Img.prototype.set = function (imgName) {
@@ -101,8 +98,7 @@
         "hue","invert","saturate","sepia","grayscale","brightness","contrast"
       ];
       function shouldFilter () {
-        //return (rand(4) % 3 == 0);
-		  return 1;
+        return (rand(4) % 3 == 0);
       }
       function pickRandomFilter () {
         var filter = filters[rand(filters.length)];
@@ -113,11 +109,7 @@
           return pickRandomFilter();
         }
       }
-      function applyRandomFilter (elem,type) {
-		  
-		  if(type === 1){
-		  
-		  
+      function applyRandomFilter (elem) {
         try {
           elem.classList.remove(currentFilter);
           log(`Filter: ${currentFilter} removed`);
@@ -129,15 +121,6 @@
         } else {
           currentFilter = "";
         }
-			  
-		  }else{
-			  try{
-			  elem.classList.remove(currentFilter);
-			  } catch(e){currentFilter = "";}
-			  log(`Filter: ${currentFilter} remove from GIF`);
-		  
-		  
-		  }
       }
       return {
         // This method is currently set to a 1 in 4 chance to return true.

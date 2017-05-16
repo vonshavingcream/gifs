@@ -37,7 +37,7 @@
       this.elem = elem;
       this.folder = "imgs";
       this.filetype = "jpg";
-      this.max = 11; // Files are named with numbers this is the upper limit of the file names plus one
+      this.max = 76; // Files are named with numbers this is the upper limit of the file names plus one
     }
     // If called without imgName argument it will set the image randomly
     Img.prototype.set = function (imgName) {
@@ -63,7 +63,7 @@
       Img.call(this, elem);
       this.folder = "gifs";
       this.filetype = "gif";
-      this.max = 50; // Files are named with numbers this is the upper limit of the file names plus one
+      this.max = 73; // Files are named with numbers this is the upper limit of the file names plus one
     }
     // Inherit Img's methods
     Gif.prototype = Object.create(Img.prototype);
